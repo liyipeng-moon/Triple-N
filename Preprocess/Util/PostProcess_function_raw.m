@@ -11,7 +11,6 @@ trial_ML = load(fullfile('processed',ML_FILE(1).name)).trial_ML;
 [qMetric, unitType] = run_bc(data_path);
 [UnitStrc] = load_KS4_output('./kilosort_def_5block_97',IMEC_AP_META,SyncLine);
 
-
 for trial_idx = 1:length(trial_ML)
     trial_ML(trial_idx).AnalogData.Mouse=[];
     trial_ML(trial_idx).AnalogData.KeyInput=[];

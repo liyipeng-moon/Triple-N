@@ -12,7 +12,6 @@ high_line_time2 = global_params.high_line_time2;
 
 good_idx = 1;
 GoodUnitStrc = UnitStrc;
-
 trial_valid_idx = meta_data.trial_valid_idx;
 onset_time_ms = meta_data.onset_time_ms;
 img_size = meta_data.img_size;

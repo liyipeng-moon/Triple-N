@@ -19,7 +19,7 @@ if nargin < 5
     kilosortVersion = 2;
 end
 param = struct; %initialize structure 
-
+%
 %% calculating quality metrics parameters 
 % plotting parameters 
 param.plotDetails = 0; % generates a lot of plots, 
