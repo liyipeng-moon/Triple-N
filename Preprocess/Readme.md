@@ -1,7 +1,22 @@
 # Preprocessing code for NNN
 This repository contains the preprocessing code for NNN data, as well as other datasets collected in BaoLab (PKU) using the [Macaque Fixation task](https://github.com/liyipeng-moon/PassiveViewing_in_ML))
 
-### Dependency:
+The preprocessing consists of two main steps: 
+Python step – Run **Analysis.ipynb** within each session folder to perform spike-sorting analysis without behavioral information. This step runs in Python. 
+Matlab step – Run **NSD_Process_pipeline.m** to align the electrophysiology system with the behavioral system. 
+
+
+### Python Environment Setup
+```bash
+conda create --name si_kilosort python=3.10
+conda activate si_kilosort
+pip install spikeinterface[full]
+python -m pip install kilosort[gui]
+pip uninstall torch
+conda install pytorch pytorch-cuda=11.8 -c pytorch -c nvidia
+```
+
+### Matlab Dependency:
 Add the following tools to the `/util` directory:  
 [BombCell](https://github.com/Julie-Fabre/bombcell/)    
 [prettify_matlab](https://github.com/Julie-Fabre/prettify_matlab)  
@@ -22,4 +37,4 @@ Output: `GoodUnit*.mat`
 This function load LFP signal and align to image onset time.  
 Output: `GoodLFP*.mat`  
 
-### Run `S0_ConvertMatTOh5.m` to generate H5 file from GoodUnit
+### Run `S0_ConvertMatTOh5.m` to generate H5 file from GoodUnit, if you don't have it in your downloaded data.
