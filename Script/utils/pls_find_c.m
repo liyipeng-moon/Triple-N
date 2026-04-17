@@ -1,4 +1,8 @@
 function [r,r2,best_c] = pls_find_c(feature, response, cv_num)
+% Performs PLS regression to predict response from feature
+% selecting the optimal number of components based on MSE.
+% 
+% Returns the correlation (r), R² (r2), and the best component number (best_c).
 
 response = zscore(response);
 [XL,YL,XS,YS,BETA,PCTVAR,MSE,stats] = plsregress(feature, response', 10,'cv',20);

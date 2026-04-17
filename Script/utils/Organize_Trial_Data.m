@@ -1,4 +1,9 @@
 function MTX = Organize_Trial_Data(Ras,Idx)
+% Reorganizes trial-wise neural raster data into a standardized 3D matrix
+% (unit × image × repetition) by equalizing trial counts across images
+% , and applies z-score normalization per unit. 
+% 
+% This is used for tuning raster data  format used for GSN analysis.
 
 rep = 999;
 for img = 1:1000

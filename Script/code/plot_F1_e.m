@@ -1,17 +1,14 @@
 clear
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-cd(root_dir)
-addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
-mkdir Figs\F1
+load("DIRS.mat")
+
 interested_ses = 1;
-all_data = dir(fullfile(proc_dir,sprintf("Processed_ses%02d_*", interested_ses)));
-load(all_data.name)
-all_data = dir(fullfile(raw_dir,sprintf("ses%02d_*info*", interested_ses)));
-load(all_data.name)
+all_data = dir(fullfile(prep_dir,sprintf("Processed_ses%02d_*", interested_ses)));
+load(fullfile(prep_dir,all_data(1).name))
+all_data = dir(fullfile(H5_dir,sprintf("ses%02d_*info*", interested_ses)));
+load(fullfile(H5_dir,all_data(1).name))
 trial_data = meta_data.trial_valid_idx;
 onset_time = meta_data.onset_time_ms;
-load img_pool.mat;
+load(fullfile(root_dir,"Data","others",'img_pool.mat'));
 % Play with 10 trials, in 
 step = 8;
 for a_start = 4008:7:5000
@@ -23,7 +20,6 @@ for a_start = 4008:7:5000
 
     if(max(img_idx)<1000 && min(img_idx)>0 && max(diff(onset_time(a:b)))<350)
         img = [];onset_bar = [];
-
         for ii = 1:length(img_idx)
             img = [img, img_pool{img_idx(ii)}];
             img = [img, 128*ones(size(img_pool{1}))];
@@ -105,6 +101,7 @@ end
 
 set(gcf,'renderer','painters');
 figsave(fullfile(root_dir,"Figs/F1"),sprintf('F1'))
+
 return
 % %%
 % figure
@@ -235,8 +232,8 @@ for tt = 1:length(time_winsow_all)
     output   = frame2im(output);
     [imind, cm] = rgb2ind(output, 256);
     if(tt==1)
-        imwrite(imind, cm, fullfile("Figs/F1/",'Illustration.gif'), 'gif', 'Loopcount', inf, 'DelayTime', 0.0167);
+        imwrite(imind, cm, fullfile('Illustration.gif'), 'gif', 'Loopcount', inf, 'DelayTime', 0.0167);
     else
-        imwrite(imind, cm, fullfile("Figs/F1/",'Illustration.gif'), 'gif', 'WriteMode', 'append', 'DelayTime', 0.0167);
+        imwrite(imind, cm, fullfile('Illustration.gif'), 'gif', 'WriteMode', 'append', 'DelayTime', 0.0167);
     end
 end

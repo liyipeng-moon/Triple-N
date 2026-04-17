@@ -1,4 +1,6 @@
 function bin_scatter(x,y,binx,biny)
+% Computes a 2D histogram of points (x, y) using the specified binx and biny edges, 
+% then visualizes the resulting density as a log-scaled heatmap with a diverging colormap. 
 
 density_plot = zeros([length(binx)-1, length(biny)-1]);
 for xx = 1:length(binx)-1
@@ -13,7 +15,6 @@ cm_here = colormap_matplotlib('coolwarm');
 cm_here = cm_here(floor([257:513]/2),:);
 imagesc(binx,biny,density_plot)
 cm_here(1,:) = [1,1,1];
-
 
 clim([0.9,max(density_plot(:))]);
 set(gca,'ColorScale','log')

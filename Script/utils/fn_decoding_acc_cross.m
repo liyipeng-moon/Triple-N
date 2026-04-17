@@ -1,6 +1,7 @@
 function [acc_here,pred_pc_val] = fn_decoding_acc_cross(neuron_score, FC_score,max_repetition, cluster_id)
-
-
+% Performs neural decoding by predicting FC_score from neuron_score using 
+% leave-one-out linear regression, then computes decoding accuracy (across images within clusters) over 
+% repeated random subsets and correlation with each principal component. 
 
 
 pred_feature = zeros(size(FC_score));

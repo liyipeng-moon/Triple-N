@@ -1,26 +1,26 @@
 clear;clc
-root_dir = 'C:\Users\moonl\Desktop\NNN';
+load('DIRS.mat')
 cd(root_dir)
-addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
+mkdir Figs
+mkdir(fullfile('Figs','F4'))
 reliability_thres = 0.4;
-manual_data = readtable("exclude_area.xls");
-stats_dir = fullfile(root_dir,"Figs/stats/");
-mkdir Figs\
-mkdir Figs\F4\
+manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
+stats_dir = fullfile(root_dir,"Figs","stats");
+
 UnitType = {};
 neuron_area = [];
 bigROI = [];
 bigROI_areawise=[];
 interested_time_point = -49:5:350;
 ephys_time_course = [];
-meta_example = load("ses10_240726_M5_3_info.mat");
+meta_example = load(fullfile(H5_dir,"ses10_240726_M5_3_info.mat"));
+
 for area_now = 1:size(manual_data,1)
     ses_idx = manual_data.SesIdx(area_now);
-    proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', ses_idx)));proc1_file_name = proc1_file_name.name;
-    pro1_data = load(fullfile(proc_dir,proc1_file_name));
-    filename_here = dir(fullfile(raw_dir,sprintf('ses%02d*h5',ses_idx)));filename_here = filename_here.name;
-    PSTHData = h5read(fullfile(raw_dir,filename_here), '/response_matrix_img');
+    proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ses_idx)));proc1_file_name = proc1_file_name.name;
+    pro1_data = load(fullfile(prep_dir,proc1_file_name));
+    filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',ses_idx)));filename_here = filename_here.name;
+    PSTHData = h5read(fullfile(H5_dir,filename_here), '/response_matrix_img');
     x1 = manual_data.y1(area_now);x2 = manual_data.y2(area_now);pos_now = pro1_data.pos;
 
     unit_here = find(pos_now>x1 & pos_now<x2 & pro1_data.reliability_best>reliability_thres);
@@ -36,9 +36,9 @@ for area_now = 1:size(manual_data,1)
     clear PSTHData
 end
 %% Load Human NSD
-ROI_info=load('ROI_info.mat');
+fMRI_dataset_path=fullfile(root_dir,"Data","FMRI");
+ROI_info=load(fullfile(fMRI_dataset_path,'ROI_info.mat'));
 subject_pool = {1,2,5,7};
-fMRI_dataset_path = 'C:\Users\moonl\Desktop\NNN\NNN_Data\FMRI';
 fMRI_data_subject_pool ={};
 all_data_fmri_general=[];
 all_data_fmri_EVC=[];
@@ -234,4 +234,4 @@ for area_idx = 1:max(neuron_area)
     end
     area_idx
 end
-save(fullfile(proc_dir,sprintf('RDM_S%d_splits.mat', 5)), 'rdm_lh', 'rdm_rh');
+save(fullfile(prep_dir,sprintf('RDM_S%d_splits.mat', 5)), 'rdm_lh', 'rdm_rh');

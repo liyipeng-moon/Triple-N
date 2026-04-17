@@ -1,10 +1,8 @@
 clear;clc
-root_dir = 'C:\Users\moonl\Desktop\NNN';
+load DIRS.mat
 cd(root_dir)
-addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
 %%
-img = load("img_pool.mat").img_pool;
+img = load(fullfile(root_dir,'Data','others','img_pool.mat')).img_pool;
 Contrast_Map = zeros([1000,50,50]);
 Luminance_Map = zeros([1000,50,50]);
 parfor i = 1:1000
@@ -12,13 +10,12 @@ parfor i = 1:1000
 end
 Contrast_Map = Contrast_Map(:, 2:end-1, 2:end-1);
 Luminance_Map = Luminance_Map(:,2:end-1,2:end-1);
-%%
+%% EF
 close all
-
 for interested_ses = [78, 79]
     clear rf_all params fit_result gof
-    proc_file = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*',interested_ses)));
-    load(fullfile(proc_dir,proc_file.name))
+    proc_file = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*',interested_ses)));
+    load(fullfile(prep_dir,proc_file.name))
     rf_all = zeros([length(F_SI),48,48]);
     unit_n = length(F_SI);
     tic
@@ -68,16 +65,10 @@ for interested_ses = [78, 79]
     drawnow
     figsave(fullfile(root_dir,"Figs/EVC/"),sprintf('%d',interested_ses))
 
-    
 end
-
 %% 
-clear;clc
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-cd(root_dir)
-addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
-manual_data = readtable("exclude_area.xls");
+
+manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
 
 [s,s_name] = load_embedding;
 alex_array = 9:16;
@@ -90,14 +81,15 @@ for case_idx = 1:length(interesed_case)
     Latency{case_idx} = []; R_array = []; best_layer{case_idx} = [];
     for area_idx = 1:102
         if(strcmp(manual_data.AREALABEL{area_idx}(1:length(interesed_case{case_idx})),interesed_case{case_idx}))
-            proc_file = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*',manual_data.SesIdx(area_idx))));
-            proc_data = load(fullfile(proc_dir,proc_file.name));
+            proc_file = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*',manual_data.SesIdx(area_idx))));
+            proc_data = load(fullfile(prep_dir,proc_file.name));
             unit_here = find(proc_data.pos>manual_data.y1(area_idx) & proc_data.pos<manual_data.y2(area_idx) & proc_data.reliability_best>0.4);
             unit_here = find(proc_data.reliability_best>0.4);
             [~, lat] = max(proc_data.mean_psth(unit_here,51:350)');
             Latency{case_idx} = [Latency{case_idx}, lat];
-            encoder_data = load(sprintf('s5_encode_ses_%03d.mat', area_idx));
-            reliability_here = load(sprintf('s5_encode_ses_%03d.mat', area_idx)).r_here;
+
+            encoder_data = load(fullfile(prep_dir,sprintf('s5_encode_ses_%03d.mat', area_idx)));
+            reliability_here = load(fullfile(prep_dir,sprintf('s5_encode_ses_%03d.mat', area_idx))).r_here;
             for unit = 1:length(reliability_here)
                 r = encoder_data.pred_r_array(unit,:);
                 r2 = encoder_data.pred_r2_array(unit,:);
@@ -120,14 +112,14 @@ case_idx=4;
 Latency{case_idx} = []; R_array = []; best_layer{case_idx} = [];
 for area_idx = 1:102
     if(strcmp(manual_data.Area{area_idx},'IT'))
-        proc_file = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*',manual_data.SesIdx(area_idx))));
-        proc_data = load(fullfile(proc_dir,proc_file.name));
+        proc_file = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*',manual_data.SesIdx(area_idx))));
+        proc_data = load(fullfile(prep_dir,proc_file.name));
         unit_here = find(proc_data.pos>manual_data.y1(area_idx) & proc_data.pos<manual_data.y2(area_idx) & proc_data.reliability_best>0.4);
         [~, lat] = max(proc_data.mean_psth(unit_here,51:350)');
         Latency{case_idx} = [Latency{case_idx}, lat];
 
-        encoder_data = load(sprintf('s5_encode_ses_%03d.mat', area_idx));
-        reliability_here = load(sprintf('s5_encode_ses_%03d.mat', area_idx)).r_here;
+        encoder_data = load(fullfile(prep_dir,sprintf('s5_encode_ses_%03d.mat', area_idx)));
+        reliability_here = load(fullfile(prep_dir,sprintf('s5_encode_ses_%03d.mat', area_idx))).r_here;
         for unit = 1:length(reliability_here)
             r = encoder_data.pred_r_array(unit,:);
             r2 = encoder_data.pred_r2_array(unit,:);

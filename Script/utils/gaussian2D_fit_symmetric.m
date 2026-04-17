@@ -1,4 +1,9 @@
 function [params, fit_result, gof] = gaussian2D_fit_symmetric(matrix)
+% Fits a symmetric 2D Gaussian model to the input matrix by optimizing 
+% amplitude, center position, shared standard deviation, and background offset. 
+% 
+% Returns the fitted parameters, the fitted model object, and the adjusted R² goodness-of-fit.
+
 sf = 11/size(matrix,1);
 [X, Y] = meshgrid(1:size(matrix,2), 1:size(matrix,1)) ;
 h = size(matrix,2)/2;

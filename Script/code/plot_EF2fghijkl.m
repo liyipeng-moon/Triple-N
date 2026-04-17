@@ -1,13 +1,12 @@
 clear
-clc
+
 close all
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-[proc_dir,raw_dir] = gen_dirs(root_dir);
+load DIRS.mat
+
 addpath(genpath(root_dir));
 mkdir Figs\
 mkdir Figs\F2S\
-H5Folder = 'C:\Users\moonl\Desktop\NNN\NNN_Data\Raw\H5FILES';
-ProcFolder = 'C:\Users\moonl\Desktop\NNN\NNN_Data\Processed';
+
 IT_session = [1:70, 88];
 % Spike Quality, for IT data.
 reliability_thres = 0.4;
@@ -29,12 +28,12 @@ for ses_idx = 1:90
     else
         A=2;
     end
-    proc1_file_name = dir(fullfile(ProcFolder,sprintf('Processed_ses%02d*', ses_idx)));
+    proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ses_idx)));
     proc1_file_name = proc1_file_name.name;
-    pro1_data = load(fullfile(ProcFolder,proc1_file_name));
-    metaname_here = dir(fullfile(H5Folder,sprintf('ses%02d*mat',ses_idx)));
+    pro1_data = load(fullfile(prep_dir,proc1_file_name));
+    metaname_here = dir(fullfile(H5_dir,sprintf('ses%02d*mat',ses_idx)));
     metaname_here = metaname_here.name;
-    meta_data = load(fullfile(H5Folder,metaname_here));
+    meta_data = load(fullfile(H5_dir,metaname_here));
     rr = pro1_data.reliability_best;
     unit_here = find(rr>reliability_thres);
     UnitType = [UnitType, pro1_data.UnitType(unit_here)];
@@ -166,11 +165,11 @@ end
 root_dir = 'C:\Users\moonl\Desktop\NNN';
 cd(root_dir)
 addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
+[prep_dir,H5_dir] = gen_dirs(root_dir);
 stats_dir = fullfile(root_dir,"Figs/stats/");
 manual_data = readtable("exclude_area.xls");
 coor_data = readtable('AreaXYZ.xlsx');
-all_proc_data = dir(fullfile(proc_dir,'Proces*'));
+all_proc_data = dir(fullfile(prep_dir,'Proces*'));
 AP_range = max(coor_data.A)-min(coor_data.A);
 all_cm = colormap_matplotlib('plasma');
 all_cm = all_cm(1:200,:);
@@ -182,9 +181,9 @@ rr_pool = [];
 r_basic_pool = [];
 r_find_pool = [];
 for ses_idx = 1:90
-    proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', ses_idx)));
+    proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ses_idx)));
     proc1_file_name = proc1_file_name.name;
-    pro1_data = load(fullfile(proc_dir,proc1_file_name));
+    pro1_data = load(fullfile(prep_dir,proc1_file_name));
     unit_here = find(pro1_data.reliability_best>0.4);
     d1 = pro1_data.best_r_time1(unit_here);
     d2 = pro1_data.best_r_time2(unit_here);
@@ -215,9 +214,9 @@ rr_pool = [];
 r_basic_pool = [];
 r_find_pool = [];
 for ses_idx = 1:length(all_proc_data)
-    proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', ses_idx)));
+    proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ses_idx)));
     proc1_file_name = proc1_file_name.name;
-    pro1_data = load(fullfile(proc_dir,proc1_file_name));
+    pro1_data = load(fullfile(prep_dir,proc1_file_name));
     d1 = pro1_data.best_r_time1;
     d2 = pro1_data.best_r_time2;
     rr_pool = [rr_pool;pro1_data.r_search_pool];

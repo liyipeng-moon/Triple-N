@@ -1,9 +1,4 @@
-clear
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-H5_dir = 'C:\Users\moonl\Desktop\NNN\NNN_Data\Raw\H5FILES';
-prep_dir = 'C:\Users\moonl\Desktop\NNN\NNN_Data\processed';
-cd(root_dir)
-addpath(genpath(pwd));
+load DIRS.mat
 %%
 % GLOBAL PARA
 face_idx = 1001:1024;
@@ -34,13 +29,14 @@ cd(H5_dir)
 parpool(20)
 for ses_number_now = 1:90
     tic
-    filename_here = dir(sprintf('ses%02d*h5',ses_number_now));
+
+    filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',ses_number_now)));
     filename_here = filename_here.name;
-    metaname_here = dir(sprintf('ses%02d*mat',ses_number_now));
+    metaname_here = dir(fullfile(H5_dir,sprintf('ses%02d*mat',ses_number_now)));
     metaname_here = metaname_here.name;
-    meta_data = load(metaname_here);
-    RasterData = h5read(filename_here, '/raster_matrix_img');
-    PSTHData = h5read(filename_here, '/response_matrix_img');
+    meta_data = load(fullfile(H5_dir,metaname_here));
+    RasterData = h5read(fullfile(H5_dir,filename_here), '/raster_matrix_img');
+    PSTHData = h5read(fullfile(H5_dir,filename_here), '/response_matrix_img');
     pre_onset = meta_data.global_params.pre_onset;
     psth_range = meta_data.global_params.PsthRange;
     % params
@@ -62,11 +58,6 @@ for ses_number_now = 1:90
     reliability_find_testset = row_example;
     best_r_time1 = row_example;
     best_r_time2 = row_example;
-    
-    figure;title(ses_number_now)
-    imagesc(squeeze(mean(RasterData,1)))
-    title(filename_here,Interpreter="none")
-    drawnow
 
     parfor unit = 1:UnitNum
         single_r_pool = zeros([1, bin_size]);

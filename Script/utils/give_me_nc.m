@@ -1,5 +1,8 @@
 function r = give_me_nc(raster, img_idx, intested_img, boot_times)
-
+% Estimates noise-corrected reliability of neural responses by splitting 
+% trials for each image into two halves, computing their correlation across
+% images, and applying a Spearman–Brown correction. The procedure is 
+% repeated with bootstrapping to obtain a stable average reliability estimate.
 
 Image_LOCs = cell(length(intested_img),1);
 for ii = 1:length(intested_img)

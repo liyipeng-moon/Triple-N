@@ -1,4 +1,10 @@
 function [LVR_m,LVR_h,TimeLag] = gen_species_difference(v_idx, l_idx)
+% Aggregates neural and fMRI encoding performance to quantify species 
+% differences between visual (v_idx) and language (l_idx) models, 
+% computing Deming regression slopes for macaque (LVR_m) and human (LVR_h) data.
+% 
+% Also estimates the average encoding peak temporal lag between model.
+
 root_dir = 'C:\Users\moonl\Desktop\NNN';
 [proc_dir,~] = gen_dirs(root_dir);
 manual_data = readtable("exclude_area.xls");
@@ -28,13 +34,10 @@ for ses = 1:102
     end
 end
 %%
-
 x_here = AVG_data(:,1);
 y_here = AVG_data(:,2);
 [LVR_m,~] = demingRegression(x_here, y_here);
-
 x_here = fMRI_performance(:,1);
 y_here = fMRI_performance(:,2);
 [LVR_h,~] = demingRegression(x_here, y_here);
-
 TimeLag = mean(TimeLag);

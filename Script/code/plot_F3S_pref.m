@@ -1,24 +1,25 @@
 close all
 clear;clc
-root_dir = 'C:\Users\moonl\Desktop\NNN';
+load DIRS.mat
 cd(root_dir)
 addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
 reliability_thres = 0.4;
-
-
 addpath(genpath(pwd))
-manual_data = readtable("exclude_area.xls");
+manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
 interested_time_point = 1:400;
-meta_example = load("ses10_240726_M5_3_info.mat"');
-load img_pool.mat
-load Clus_savee.mat
+meta_example = load(fullfile(H5_dir,"ses10_240726_M5_3_info.mat"'));
+load(fullfile(root_dir,'Data','others','img_pool.mat'))
+try
+    load(fullfile(prep_dir,'Clus_save.mat'))
+catch
+    warning('Run S3_psth.m first!')
+end
+cm_here = colormap_matplotlib('Set1',9);
+figure;set(gcf,'Position',[500 200 1200 650])
+%%
 
 interested_area={'MO','AO','MF','AF','MB','AB','LP','PI','CL','AM'};
 areaname={'M-Object','A-Object','M-Face','A-Face','M-Body','A-Body','Scene1','Scene2','M-Color','A-Color'};
-cm_here = colormap_matplotlib('Set1',9);
-figure
-set(gcf,'Position',[500 200 1200 650])
 
 for aa = 1:length(interested_area)
     for interested_unit = 1:3
@@ -29,17 +30,16 @@ for aa = 1:length(interested_area)
             if(strcmp(manual_data.AREALABEL{search_area}(1:2),interested_area{aa}))
                 ThisSes_idx = manual_data.SesIdx(search_area);
 
-                proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', ThisSes_idx)));
+                proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ThisSes_idx)));
                 proc1_file_name = proc1_file_name.name;
-                pro1_data = load(fullfile(proc_dir,proc1_file_name));
+                pro1_data = load(fullfile(prep_dir,proc1_file_name));
 
-                filename_here = dir(fullfile(raw_dir,sprintf('ses%02d*h5',ThisSes_idx)));
+                filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',ThisSes_idx)));
                 filename_here = filename_here.name;
-                metaname_here = dir(fullfile(raw_dir, sprintf('ses%02d*mat',ThisSes_idx)));
+                metaname_here = dir(fullfile(H5_dir, sprintf('ses%02d*mat',ThisSes_idx)));
                 metaname_here = metaname_here.name;
                 meta_data = load(metaname_here);
                 PSTHData = h5read(filename_here, '/response_matrix_img');
-
 
                 x1=manual_data.y1(search_area);x2=manual_data.y2(search_area);
                 good_neuron_idx = find(pro1_data.pos>x1 & pro1_data.pos<x2 & pro1_data.reliability_best>0.4);
@@ -64,8 +64,6 @@ for aa = 1:length(interested_area)
         end
 
         new_psth_combined = zeros(size(PSTH_CombinedData));
-
-
 
         for uu = 1:size(PSTH_CombinedData)
             data = squeeze(mean(PSTH_CombinedData(uu,:,1:300),2));
@@ -97,9 +95,7 @@ for aa = 1:length(interested_area)
         if(aa>8)
             xlabel('Time (ms)')
         end
-        set_font
-        drawnow
-
+        set_font;drawnow
         title(sprintf('n=%d',size(new_psth_combined,1)))
     end
     if(mod(aa,2)==1)
@@ -107,5 +103,5 @@ for aa = 1:length(interested_area)
         axis off
     end
 end
-
-figsave(fullfile(root_dir,'Figs/F3'),sprintf('F3SS'))
+%%
+figsave(fullfile(root_dir,'Figs','F3'),sprintf('F3SS'))

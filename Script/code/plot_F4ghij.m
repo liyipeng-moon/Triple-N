@@ -1,9 +1,8 @@
 %% Second Part of Fig.4
 %% Play with ROI
 clear
-manual_data = readtable("exclude_area.xls");
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-[proc_dir,raw_dir] = gen_dirs(root_dir);
+manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
+
 load ROI_data.mat
 load img_pool.mat
 
@@ -49,12 +48,12 @@ for aa = 1:length(interested_area)
     for search_area = 1:height(manual_data)
         if(strcmp(manual_data.AREALABEL{search_area},interested_area{aa}))
             ThisSes_idx = manual_data.SesIdx(search_area);
-            proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', ThisSes_idx)));
+            proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ThisSes_idx)));
             proc1_file_name = proc1_file_name.name;
-            pro1_data = load(fullfile(proc_dir,proc1_file_name));
-            filename_here = dir(fullfile(raw_dir,sprintf('ses%02d*h5',ThisSes_idx)));
+            pro1_data = load(fullfile(prep_dir,proc1_file_name));
+            filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',ThisSes_idx)));
             filename_here = filename_here.name;
-            metaname_here = dir(fullfile(raw_dir,sprintf('ses%02d*mat',ThisSes_idx)));
+            metaname_here = dir(fullfile(H5_dir,sprintf('ses%02d*mat',ThisSes_idx)));
             metaname_here = metaname_here.name;
             meta_data = load(metaname_here);
             x1=manual_data.y1(search_area);x2=manual_data.y2(search_area);

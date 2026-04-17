@@ -1,14 +1,13 @@
 %% This demo code read one session data from session 46
 clear
-all_goodunit = dir('Data\GoodUnit_*');
-all_procdata = dir('Data\Processed_ses*');
+GoodUnit_Dir = 'C:\Users\moonl\Desktop\NNN\Data\Raw\GoodUnit';
+Prep_Dir = 'C:\Users\moonl\Desktop\NNN\Data\Processed';
 interesred_ses = 46;
-load(fullfile('Data',all_goodunit(interesred_ses).name));
-load(fullfile('Data',all_procdata(interesred_ses).name));
+load(fullfile(GoodUnit_Dir,'GoodUnit_241112_ZhuangZhuang_NSD1000_LOC_g3.mat'));
+load(fullfile(Prep_Dir,'Processed_ses46_241112_M3_3.mat'));
 img_idx = meta_data.trial_valid_idx(meta_data.trial_valid_idx~=0); % extract valid trial for this session
 psth_t = global_params.PsthRange;
 load img_pool.mat
-
 %% how the raster and psth plot of several images
 % for the most body selective neuron
 

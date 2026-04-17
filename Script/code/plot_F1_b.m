@@ -1,19 +1,17 @@
 clear
-cd C:\Users\moonl\Desktop\NNN
-addpath(genpath(pwd));
-BrainData = niftiread("NMT_v2.1_sym_SS.nii.gz");
-BrainMask = niftiread('NMT_v2.1_sym_brainmask.nii.gz');
-NIFTI_DATA = niftiinfo('NMT_v2.1_sym_SS.nii.gz');
+load("DIRS.mat")
+MRI_dir=fullfile(code_dir,'utils','downloaded','MRI');
+BrainData = niftiread(fullfile(MRI_dir,"NMT_v2.1_sym_SS.nii.gz"));
+BrainMask = niftiread(fullfile(MRI_dir,'NMT_v2.1_sym_brainmask.nii.gz'));
+NIFTI_DATA = niftiinfo(fullfile(MRI_dir,'NMT_v2.1_sym_SS.nii.gz'));
 BrainData = uint8(BrainData./4);
 x0 = size(BrainData,1)/2; % larget is left
 y0 = size(BrainData,2)/2; % larger is anterior
 z0 = size(BrainData,3)/2; % larger is superior
-
-
 %%
 clear brain_img_to_plot
 close all
-Area_DATA = readtable('AreaXYZ.xlsx');
+Area_DATA = readtable(fullfile(root_dir,"Data",'others','AreaXYZ.xlsx'));
 area_number = length(Area_DATA.AreaIDX);
 
 AP_series = sort(unique(Area_DATA.A));
@@ -104,7 +102,8 @@ for dd = 1:length(AP_series)
     LOCb_text = (b-1)*size_of_one_img(2);
     text(170+LOCb_text,125+LOCa_text,sprintf('%.1f mm ',AP_series(dd)),'FontWeight','Bold',"FontSize",12,Color=[0,0,0]);
 end
-saveas(gcf,'C:\Users\moonl\Desktop\NNN\Figs\F1\MRI.svg')
+saveas(gcf,fullfile(root_dir,'Figs','F1','F1B_MRI.svg'))
+imwrite(big_img,fullfile(root_dir,'Figs','F1','F1B_MRI.png'))
 %%
 figure; hold on
 set(gcf,'Position',[200 200 700 70])
@@ -130,4 +129,4 @@ end
 axis off
 xlim([0.5,7])
 ylim([0.8,1.2])
-saveas(gcf,'C:\Users\moonl\Desktop\NNN\Figs\F1\LB.svg')
+saveas(gcf,fullfile(root_dir,'Figs','F1','F1B_LB.svg'))

@@ -1,4 +1,4 @@
-function S5_Encoding_Session(area_now)
+function analysis_S5_encoding_session(area_now)
 root_dir = 'C:\Users\moonl\Desktop\NNN';
 cd(root_dir)
 addpath(genpath(pwd));

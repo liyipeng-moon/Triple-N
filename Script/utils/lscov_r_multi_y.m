@@ -1,4 +1,9 @@
 function [r] = lscov_r_multi_y(feature, response, component_number)
+% Predicts multi-dimensional responses from input features using PLS regression
+% with a fixed number of components, evaluated via 2-fold cross-validation. 
+% 
+% Returns the per-dimension correlation between predicted and true responses.
+
 response = zscore(response);
 cv = cvpartition(size(response,1), 'KFold', 2);
 trainIdx = training(cv, 1);

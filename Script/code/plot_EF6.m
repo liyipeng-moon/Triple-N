@@ -1,14 +1,13 @@
 clear;clc
-root_dir = 'C:\Users\moonl\Desktop\NNN';
+load DIRS.mat
 cd(root_dir)
-addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
 reliability_thres = 0.4;
-manual_data = readtable("exclude_area.xls");
-stats_dir = fullfile(root_dir,"Figs/stats/");
+manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
+stats_dir = fullfile(root_dir,"Figs","stats");
 mkdir Figs\
 mkdir Figs\F4\
-load img_pool.mat
+
+img = load(fullfile(root_dir,'Data','others','img_pool.mat')).img_pool;
 
 order = randperm(12);
 face_idx = 1000+[1:5,9:15,6,7,8,16:24];
@@ -31,12 +30,12 @@ for interested_area =  {'MB3'}
         for search_area = 1:height(manual_data)
             if(strcmp(manual_data.AREALABEL{search_area},interested_area{aa}))
                 ThisSes_idx = manual_data.SesIdx(search_area);
-                proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', ThisSes_idx)));
+                proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ThisSes_idx)));
                 proc1_file_name = proc1_file_name.name;
-                pro1_data = load(fullfile(proc_dir,proc1_file_name));
-                filename_here = dir(fullfile(raw_dir,sprintf('ses%02d*h5',ThisSes_idx)));
+                pro1_data = load(fullfile(prep_dir,proc1_file_name));
+                filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',ThisSes_idx)));
                 filename_here = filename_here.name;
-                metaname_here = dir(fullfile(raw_dir,sprintf('ses%02d*mat',ThisSes_idx)));
+                metaname_here = dir(fullfile(H5_dir,sprintf('ses%02d*mat',ThisSes_idx)));
                 metaname_here = metaname_here.name;
                 meta_data = load(metaname_here);
                 x1=manual_data.y1(search_area); x2=manual_data.y2(search_area);
@@ -57,7 +56,7 @@ for interested_area =  {'MB3'}
     end
 end
 %%
-fMRI_dataset_path = 'C:\Users\moonl\Desktop\NNN\NNN_Data\FMRI';
+fMRI_dataset_path = fullfile(root_dir,'Data','FMRI');
 interested_subject=5;
 hemi_here = 'lh';
 fMRI_data = load(fullfile(fMRI_dataset_path,sprintf('S%d_%s_Rsp.mat',interested_subject,hemi_here)));
@@ -85,16 +84,15 @@ parfor unit_idx = 1:length(B_si)
 end
 toc
 clear rh_data lh_data fMRI_data
-save(fullfile(proc_dir,sprintf('RDM_MSB_ZZ.mat')))
+save(fullfile(prep_dir,sprintf('RDM_MSB_ZZ.mat')))
 %% look at each unit  and select some unit with different corelation profile
 close all
+load(fullfile(root_dir,'Data','others','img_pool.mat'))
 img_example = [];
 for cc = 1:6
     for ins = 1
         idx = loc_idx(12*(cc-1)+[ins]);
-
             img_example = [img_example, img_pool{idx}];
-
     end
 end
 figure
@@ -110,12 +108,18 @@ for example_now = 1:length(example_unit)
         mm(cc) = mean(rsp_here(idx));
         ee(cc) = std(rsp_here(idx))./sqrt(12);
     end
-    bar(1:6, mm,'FaceAlpha',0.1,'FaceColor',[1,0,0])
+    bar(1:6, mm,'FaceAlpha',0.5,'EdgeAlpha',0)
     errorbar(1:6, mm,ee,'LineStyle','none','Color','k','LineWidth',1,'CapSize',4)
+
+    for cc = 1:6
+        idx = 12*(cc-1)+[1:12];
+        scatter(cc+(rand([1,12])-0.5)/5,rsp_here(idx),6,"filled",'MarkerEdgeAlpha',0,MarkerFaceColor='k')
+    end
+
     xticks([1:6])
-    xticklabels({'Monkey Face','Human Face','Monkey Body','Animal','Natural Object','Manmade Object'})
+    xticklabels({'Monkey face','Human face','Monkey body','General body','Natural object','Manmade object'})
     title(sprintf('Example Unit %d\n Body SI = %.02f',example_unit(example_now), B_si(example_unit(example_now))))
-    ylabel('Firing rate (Hz)')
+    ylabel('Normalized firing rate')
     set_font
 end
 

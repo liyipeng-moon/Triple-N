@@ -1,4 +1,6 @@
 function [binc,cc]=GoodHist(data,edge_here,color_here)
+% Computes histogram counts of data using specified bin edges (edge_here) 
+% and visualizes them as a step plot with the given color. 
 
 [cc,ee] = histcounts(data,edge_here,Normalization="count");
 cc = [0,cc,0];

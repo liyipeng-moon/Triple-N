@@ -1,3 +1,4 @@
+% set this before saving images
 set(gcf,'color','w')
 hText = findall(gcf, 'Type', 'text');
 for i = 1:length(hText)

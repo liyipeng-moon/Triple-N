@@ -1,4 +1,5 @@
 function pretty_box(cm_here)
+% Customizes the appearance of a boxplot.
 
 h = findobj(gca,'Tag','Box');
 med = findobj(gca, 'Tag', 'Median');

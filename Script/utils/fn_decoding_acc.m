@@ -1,5 +1,9 @@
 function [acc_here,pred_pc_val] = fn_decoding_acc(neuron_score, FC_score,max_repetition,num_series, test_images)
+% Performs neural decoding by predicting FC_score from neuron_score using 
+% leave-one-out linear regression, then computes decoding accuracy (across all images) over 
+% repeated random subsets and correlation with each principal component. 
 
+% Returns percentage accuracy (acc_here) and per-PC correlation values (pred_pc_val).
 
 pred_feature = zeros(size(FC_score));
 parfor test_img_idx = 1:1000

@@ -1,13 +1,12 @@
 close all
 clear;clc
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-cd(root_dir)
+load("DIRS.mat")
 addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
+
 reliability_thres = 0.4;
-manual_data = readtable("exclude_area.xls");
-stats_dir = fullfile(root_dir,"Figs/stats/");
-mkdir Figs\F3\
+manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
+stats_dir = fullfile(root_dir,"Figs","stats");
+mkdir(fullfile('Figs','F3'))
 %%
 reliability = {};
 UnitType = {};
@@ -15,19 +14,19 @@ psth_ses = {};
 psth_pool = {};
 interested_time_point = 1:300;
 interested_time_point_rdm = 1:5:350;
-meta_example = load("ses10_240726_M5_3_info.mat"');
+meta_example = load(fullfile(H5_dir,"ses10_240726_M5_3_info.mat"));
 %%
 for area_now = 1:102
     if(strcmp(manual_data.Area{area_now},'EVC'))
         continue
     end
     ses_idx = manual_data.SesIdx(area_now);
-    proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', ses_idx)));
+    proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ses_idx)));
     proc1_file_name = proc1_file_name.name;
-    pro1_data = load(fullfile(proc_dir,proc1_file_name));
+    pro1_data = load(fullfile(prep_dir,proc1_file_name));
 
-    filename_here = dir(fullfile(raw_dir,sprintf('ses%02d*h5',manual_data.SesIdx(area_now))));
-    PSTH_HERE = h5read(fullfile(raw_dir,filename_here.name), '/response_matrix_img');
+    filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',manual_data.SesIdx(area_now))));
+    PSTH_HERE = h5read(fullfile(H5_dir,filename_here.name), '/response_matrix_img');
 
     x1 = manual_data.y1(area_now);
     x2 = manual_data.y2(area_now);
@@ -44,6 +43,7 @@ for area_now = 1:102
     psth_pool{area_now}=PSTH_HERE(unit_here, 1:1000, meta_example.global_params.pre_onset+interested_time_point_rdm);
 
     disp(area_now)
+    
 end
 %%
 rng(1009)
@@ -81,9 +81,8 @@ all_mean_psth = zscore(all_mean_psth(Interested_units,:),0,2);
 pos_all = pos_all(Interested_units);
 area_all = brain_area(Interested_units);
 psth_all = psth_all(Interested_units,:,:);
-
 %% CV
-keyboard
+
 psth_u1 = squeeze(mean(psth_even(Interested_units,:,:),2));
 psth_u2 = squeeze(mean(psth_odd(Interested_units,:,:),2));
 psth_um = [psth_u2+psth_u1]/2;
@@ -337,9 +336,9 @@ for area_here = setdiff(1:102,[18,19,21,79])
     xlabel('# Units')
     legend('Cluster1','Cluster2','Cluster3',Location='best',box='off')
 
-    filename_here = dir(fullfile(raw_dir,sprintf('ses%02d*h5',manual_data.SesIdx(area_here))));
-    LFPData = h5read(fullfile(raw_dir,filename_here.name), '/LFP_Data');
-    meta_here = dir(fullfile(raw_dir,sprintf('ses%02d*info.mat',manual_data.SesIdx(area_here))));
+    filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',manual_data.SesIdx(area_here))));
+    LFPData = h5read(fullfile(H5_dir,filename_here.name), '/LFP_Data');
+    meta_here = dir(fullfile(H5_dir,sprintf('ses%02d*info.mat',manual_data.SesIdx(area_here))));
     meta_data = load(meta_here.name);
 
 
@@ -430,4 +429,4 @@ for brain_area_idx = 1:max(brain_area)
     brain_loc = find(brain_area==brain_area_idx);
     clus_save{brain_area_idx}=all_cluster(brain_loc);
 end
-save(fullfile(proc_dir,'Clus_savee.mat'),'all_cluster','clus_save')
+save(fullfile(prep_dir,'Clus_savee.mat'),'all_cluster','clus_save')

@@ -1,8 +1,9 @@
 function new_img = add_edge(input_img, cc_here, pixsize)
+% Adds a constant-color border of specified width (pixsize) around the input image
+
 [rows, cols, channels] = size(input_img);
 new_rows = rows + 2 * pixsize;
 new_cols = cols + 2 * pixsize;
-
 new_img = ones(new_rows, new_cols, channels);
 for cc = 1:3
     new_img(:,:,cc) = cc_here(cc);

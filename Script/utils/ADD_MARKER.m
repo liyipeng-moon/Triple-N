@@ -1,4 +1,5 @@
 function output_img = ADD_MARKER(input_img,x,z,label)
+% Overlays a small square marker at location on the input image. (for MRI label)
 
 switch label{1}
     case 'Scene'

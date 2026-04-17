@@ -1,4 +1,8 @@
 function [contrastMap,luminanceMap] = localContrastMap(img)
+% Computes local contrast and luminance maps by dividing the image into 
+% a grid and evaluating the standard deviation and mean intensity within
+% each padded region. 
+% 
 
 gridSize = 50;
 outputSize = [400, 400];

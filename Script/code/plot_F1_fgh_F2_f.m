@@ -1,13 +1,8 @@
-clear
-clc
 close all
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-[proc_dir,raw_dir] = gen_dirs(root_dir);
-addpath(genpath(pwd));
+load("DIRS.mat")
+manual_data = readtable(fullfile(root_dir,'Data','others',"exclude_area.xls"));
 
 reliability_thres = 0.4;
-manual_data = readtable("exclude_area.xls");
-
 fanof = [];
 reliability = [];
 Sparseness = [];
@@ -17,9 +12,9 @@ area_array = [];
 rsp_all = [];
 snr_array = [];
 for ses_now = [1:90]
-    proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', ses_now)));
+    proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ses_now)));
     proc1_file_name = proc1_file_name.name;
-    pro1_data = load(fullfile(proc_dir,proc1_file_name));
+    pro1_data = load(fullfile(prep_dir,proc1_file_name));
     unit_size = length(pro1_data.reliability_basic);
     session_array = [session_array, ses_now*ones([1, unit_size])];
 
@@ -27,12 +22,12 @@ for ses_now = [1:90]
     all_area = find(manual_data.SesIdx==ses_now);
 
     % Compute Fano Factor
-    filename_here = dir(fullfile(raw_dir,sprintf('ses%02d*h5',ses_now)));
+    filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',ses_now)));
     filename_here = filename_here.name;
-    metaname_here = dir(fullfile(raw_dir,sprintf('ses%02d*mat',ses_now)));
+    metaname_here = dir(fullfile(H5_dir,sprintf('ses%02d*mat',ses_now)));
     metaname_here = metaname_here.name;
-    meta_data = load(fullfile(raw_dir,metaname_here));
-    RasterData = h5read(fullfile(raw_dir,filename_here), '/raster_matrix_img');
+    meta_data = load(fullfile(H5_dir,metaname_here));
+    RasterData = h5read(fullfile(H5_dir,filename_here), '/raster_matrix_img');
     t1 = median(pro1_data.best_r_time1(pro1_data.reliability_best>0.4));
     t2 = median(pro1_data.best_r_time2(pro1_data.reliability_best>0.4));
     t_array = meta_data.global_params.pre_onset + [t1:t2];
@@ -72,12 +67,14 @@ for ses_now = [1:90]
 
     ses_now
 end
+
 %%
 interested_area = {'MB','AB','MF','AF','MO','AO','LPP','PITP','CLC','AMC','Unknown'};
 interested_name = {'MiddleBody','AnteriorBody','MiddleFace','AnteriorFace','MiddleObject','AnteriorObject','Scene1','Scene2','MiddleColor','AnteriorColor','Unknown'};
 
 interested_area = fliplr(interested_area);
 interested_name = fliplr(interested_name);
+
 reliability_here = [];
 fanof_here = [];
 Sparseness_vec = [];
@@ -153,6 +150,29 @@ title('SNRmax')
 set_font
 
 figsave(fullfile(root_dir,'Figs\F1'),sprintf('F1low'))
+%% print some figure legends....
+clc
+fprintf('\nIn f, sample sizes are: n = ')
+for aa = length(interested_area):-1:1
+    fprintf('%d, ', sum(area_label==aa))
+end
+fprintf('visual responsive units for ')
+for aa = length(interested_area):-1:1
+    fprintf('%s, ', interested_name{aa})
+end
+fprintf('area \n')
+
+
+area_label_with_reliable = area_label(reliability_here>0.4);
+fprintf('\nIn g,h, sample sizes are: n = ')
+for aa = length(interested_area):-1:1
+    fprintf('%d, ', sum(area_label_with_reliable==aa))
+end
+fprintf('reliable units for ')
+for aa = length(interested_area):-1:1
+    fprintf('%s, ', interested_name{aa})
+end
+fprintf('area \n')
 %%
 figure
 interested_area = {'MB1','MB2','MB3','AB1','AB3','MF1','MF3','AF1','AF3','MO1s1','MO1s2','MO2','MO5','AO2','AO5','LPP4','PITP3','PITP4','CLC3','AMC3'};
@@ -204,17 +224,17 @@ figsave(fullfile(root_dir,'Figs\F2'),sprintf('F2F'))
 
 return
 %% Do tSNE
-rsp_pool = zscore(rsp_all(reliability>0.4,:),0,2);
-rng(1009)
-t_emb = tsne(rsp_pool');
-t_emb = t_emb-min(t_emb(:));
-t_emb = floor(t_emb*250+100);
-load img_pool.mat
-big_img = 255*uint8(ones([8000,8000,3]));
-for iii = 1:1000
-    t1 = t_emb(iii,1);
-    t2 = t_emb(iii,2);
-    big_img(t1:t1+226, t2:t2+226,:) = img_pool{iii};
-end
-figure;imshow(big_img)
-imwrite(big_img,fullfile(root_dir,"Figs/F2S",'F2tsne.png'))
+% rsp_pool = zscore(rsp_all(reliability>0.4,:),0,2);
+% rng(1009)
+% t_emb = tsne(rsp_pool');
+% t_emb = t_emb-min(t_emb(:));
+% t_emb = floor(t_emb*250+100);
+% load img_pool.mat
+% big_img = 255*uint8(ones([8000,8000,3]));
+% for iii = 1:1000
+%     t1 = t_emb(iii,1);
+%     t2 = t_emb(iii,2);
+%     big_img(t1:t1+226, t2:t2+226,:) = img_pool{iii};
+% end
+% figure;imshow(big_img)
+% imwrite(big_img,fullfile(root_dir,"Figs/F2S",'F2tsne.png'))

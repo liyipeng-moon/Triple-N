@@ -1,4 +1,8 @@
 function bin_scatter_eye(x,y,binx,biny)
+% Computes a 2D histogram of eye positions (x, y) using the specified binx and biny edges, 
+% visualizes the density with a blue colormap, and overlays a 2σ confidence ellipse. 
+% 
+
 density_plot = zeros([length(binx)-1, length(biny)-1]);
 for xx = 1:length(binx)-1
     for yy = 1:length(biny)-1

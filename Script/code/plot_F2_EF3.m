@@ -1,20 +1,14 @@
 clear;clc;
 close all
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-cd(root_dir);
+load('DIRS.mat')
 addpath(genpath(pwd));
-
-[proc_dir,raw_dir] = gen_dirs(root_dir);
-mkdir Figs\
-mkdir Figs\F2\
-
+mkdir(fullfile(root_dir,'Figs','F2'))
 interested_ses = 1:90;
-
 reliability_thres = 0.4;
 color_pool = my_colormap('FOB');
-load img_pool.mat
+load(fullfile(root_dir,"Data","others","img_pool.mat"))
 time_to_plot = 0:300;
-load Clusinfo.mat
+load(fullfile(root_dir,"Data","others","ClusInfo.mat"))
 face_idx = 1001:1024;
 body_idx = 1000+[26:31,43:48,50:61];
 obj_idx = setdiff(1025:1072, body_idx);
@@ -24,9 +18,9 @@ noise_corr = []; noise_corr_old_ver = [];
 rng(1009)
 clus_mean = [];
 for ses_now = 1:length(interested_ses)
-    proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', interested_ses(ses_now))));
+    proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', interested_ses(ses_now))));
     proc1_file_name = proc1_file_name.name;
-    pro1_data = load(fullfile(proc_dir,proc1_file_name));
+    pro1_data = load(fullfile(prep_dir,proc1_file_name));
     unit_plot_here = find(pro1_data.reliability_best>reliability_thres);
     rsp_here = pro1_data.response_best(unit_plot_here,1:1000);
     rsp_here = zscore(rsp_here,0,2);
@@ -46,7 +40,7 @@ for cc = 1:max(Cluster_idx)
     for ee = 1:5
         mm = [mm, img_pool{imgs_here(ee)}];
     end
-    big_img = [big_img;add_edge(mm,floor(255*all_color(cc,:)),10)];
+    big_img = [big_img;add_edge(mmw,floor(255*all_color(cc,:)),10)];
 end
 figure;
 set(gcf,'Position',[400 400 1475 600])
@@ -59,32 +53,30 @@ for cc = 1:max(Cluster_idx)
     scatter(LLM_tsne(clus_loc,1),LLM_tsne(clus_loc,2),15,MarkerFaceColor=all_color(cc,:),MarkerEdgeAlpha=0)
 end
 
-figsave(fullfile(root_dir, 'Figs\F2'),sprintf('F2S_exampleClus'))
+figsave(fullfile(root_dir, 'Figs','F2'),sprintf('F2S_exampleClus'))
 close all
 %%
-nc_array = [];
-sc_array = [];
+nc_array = []; sc_array = [];
 %%
 close all
-
-manual_data = readtable("exclude_area.xls");
+manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
 interested_ses = 1:90;
 for ses_now = 1:90
     figure
     set(gcf,'Position',[300 90 380 780])
-    proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', interested_ses(ses_now))));
+    proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', interested_ses(ses_now))));
     proc1_file_name = proc1_file_name.name;
-    pro1_data = load(fullfile(proc_dir,proc1_file_name));
+    pro1_data = load(fullfile(prep_dir,proc1_file_name));
 
-    filename_here = dir(fullfile(raw_dir,sprintf('ses%02d*h5',interested_ses(ses_now))));
+    filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',interested_ses(ses_now))));
     filename_here = filename_here.name;
-    metaname_here = dir(fullfile(raw_dir,sprintf('ses%02d*mat',interested_ses(ses_now))));
+    metaname_here = dir(fullfile(H5_dir,sprintf('ses%02d*mat',interested_ses(ses_now))));
     metaname_here = metaname_here.name;
-    meta_data = load(fullfile(raw_dir,metaname_here));
+    meta_data = load(fullfile(H5_dir,metaname_here));
 
-    RasterData = h5read(fullfile(raw_dir,filename_here), '/raster_matrix_img');
-    PSTHData = h5read(fullfile(raw_dir,filename_here), '/response_matrix_img');
-    LFPData = h5read(fullfile(raw_dir,filename_here), '/LFP_Data');
+    RasterData = h5read(fullfile(H5_dir,filename_here), '/raster_matrix_img');
+    PSTHData = h5read(fullfile(H5_dir,filename_here), '/response_matrix_img');
+    LFPData = h5read(fullfile(H5_dir,filename_here), '/LFP_Data');
 
     time_to_find = meta_data.global_params.pre_onset+time_to_plot;
     subplot(4,2,[1,2]); hold on
@@ -137,7 +129,7 @@ for ses_now = 1:90
         big_img = [big_img,[img_pool{a(e)};img_pool{a(e+4)}; 255*ones([40,227,3]); img_pool{b(e)};img_pool{b(e+4)}]];
     end
     imshow(big_img)
-    imwrite(big_img,fullfile(root_dir,'Figs/F2',sprintf('%d.png',ses_now)))
+    imwrite(big_img,fullfile(root_dir,'Figs','F2',sprintf('%d.png',ses_now)))
     ylabel('Least       Most')
     set_font
 
@@ -161,7 +153,6 @@ for ses_now = 1:90
     filename_here(filename_here=='_')='-';
     sgtitle(filename_here(1:end-3))
     set_font
-
 
     position_lim = floor([min(pro1_data.pos),max(pro1_data.pos)]/10)*10;
     position_array = position_lim(1):25:position_lim(2);
@@ -196,7 +187,7 @@ for ses_now = 1:90
     xlabel('Depth (um)')
     set_font
 
-    figsave(fullfile(root_dir,'Figs/F2'),sprintf('F2B_%02d', interested_ses(ses_now)))
+    figsave(fullfile(root_dir,'Figs','F2'),sprintf('F2B_%02d', interested_ses(ses_now)))
     try
         unit_here = find(pro1_data.reliability_best>0.4 & pro1_data.UnitType==1);
         Selected_Raster = RasterData(unit_here,:,:);
@@ -208,7 +199,6 @@ for ses_now = 1:90
         results = performgsn(MTX,struct('wantshrinkage',1));
         
         noise_rdm = results.cNb; signal_rdm = results.cSb;
-
 
         residual_response = []; signal_response=[]; trial_mean = squeeze(mean(MTX(:, :, :),3));
         for uu = 1:size(MTX,1)
@@ -272,5 +262,5 @@ for ses_now = interested_ses
     xlim([0,1]);ylim([0,1]);plot([0,1],[0,1],Color='k');xlabel('GSN'); ylabel('Original Method')
     set_font
 
-    figsave('Figs\F2',sprintf('F2N_%02d',ses_now))
+    figsave('Figs','F2',sprintf('F2N_%02d',ses_now))
 end

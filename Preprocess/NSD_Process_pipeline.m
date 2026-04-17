@@ -1,8 +1,9 @@
 clear
-root_dir = 'C:\Users\moonl\Desktop\NNN';
+root_dir = 'C:\Users\moonl\Desktop\Triple-N-main';
 raw_data_dir = fullfile(root_dir,'Data\Raw\SesFolder');
 cd(root_dir)
 addpath(genpath('C:\Users\admin\AppData\Roaming\MathWorks\MATLAB Add-Ons\Apps\NIMHMonkeyLogic22'))
+% install MonkeyLogic at https://monkeylogic.nimh.nih.gov/download.html
 addpath(genpath(root_dir))
 %%
 interested_path = {};
