@@ -1,9 +1,8 @@
 clear
 load('DIRS.mat')
 
-fMRI_dir=fullfile(root_dir,'Data','FMRI');
 % Load Brain Data for VTC ROI
-load(fullfile(fMRI_dir,'ROI_data.mat'))
+load(fullfile(FMRI_DIR,'ROI_data.mat'))
 ROI_Here = [1:6];
 compare_vec_brain = struct;
 roi_data = [];
@@ -24,14 +23,14 @@ for ROI_idx = ROI_Here
 end
 
 % Load Brain Data for EVC
-load(fullfile(fMRI_dir,'ROI_info.mat'))
+load(fullfile(FMRI_DIR,'ROI_info.mat'))
 HH = ['l','r'];
 for h = [1, 2]
     for s= [1,2,5,7]
         Vertex_now = find(eval(sprintf('S%d_%sh_EVC',s,HH(h))));
         vertex_num = length(Vertex_now);
         vertex_num
-        brain_data = load(fullfile(fMRI_dir,sprintf('S%d_%sh_Rsp.mat',s,HH(h)))).mean_brain_data;
+        brain_data = load(fullfile(FMRI_DIR,sprintf('S%d_%sh_Rsp.mat',s,HH(h)))).mean_brain_data;
         brain_data = brain_data(Vertex_now,:);
         roi_data = [roi_data; brain_data];
         voxel_info_1 = [voxel_info_1, 0*ones([1, vertex_num])]; % which ROI, zero is EVC

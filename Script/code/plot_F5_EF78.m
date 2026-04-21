@@ -6,7 +6,8 @@ manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
 stats_dir = fullfile(root_dir,"Figs","stats");
 fid = fopen(fullfile(stats_dir, 'F5.txt'),'w');
 [s,s_name] = load_embedding;
-%% Analysis for alexnet_fc6 and mpnet
+%% load data from encoding step
+% Analysis for alexnet_fc6 and mpnet
 Alex_FC_idx = 14;
 Mpnet_idx = 6;
 load(fullfile(root_dir,'Data','fMRI_result.mat'))
@@ -15,7 +16,7 @@ for vertex = 1:length(Interested_Voxel)
     fMRI_performance(vertex,1) = r(Interested_Voxel(vertex),Alex_FC_idx);
     fMRI_performance(vertex,2) = r(Interested_Voxel(vertex),Mpnet_idx);
 end
-%%
+%
 AVG_data = [];
 TimeCourseData = [];
 for ses = 1:102
@@ -32,23 +33,21 @@ for ses = 1:102
     ses
 end
 %%
+figure(1); set(gcf,'Position',[30 200 1825 600])
 
-figure(1);
-set(gcf,'Position',[30 200 1825 600])
-subplot(2,5,6); pbaspect([1,1,1])
-hold on
-x_here = AVG_data(:,1);
+% Fig. 5c
+subplot(2,5,6); pbaspect([1,1,1]);hold on
+x_here = AVG_data(:,1); 
 y_here = AVG_data(:,2);
 [beta,beta_CI] = demingRegression(x_here, y_here);
-
 bin_scatter(x_here,y_here,[0:0.01:1],[0:0.01:1]);
 plot([0,1], [0,beta],'Color','k','LineWidth',1)
 xlabel('Visual model (r)');ylabel('Language model (r)')
 title(sprintf('NNN performance\nLVR: %.02f',beta))
 set_font
 
-subplot(2,5,7); pbaspect([1,1,1])
-hold on
+% Fig. 5d
+subplot(2,5,7); pbaspect([1,1,1]);hold on
 x_here = fMRI_performance(:,1);
 y_here = fMRI_performance(:,2);
 [beta,beta_CI] = demingRegression(x_here, y_here);
@@ -64,10 +63,9 @@ for mm = [1,2]
     [a(mm,:),b(mm,:)] = max(data_here');
 end
 
-figure(52)
-subplot(3,4,11);
-pbaspect([1,1,1])
-hold on
+% not shown in paper, but related to Fig. 5g
+figure(52); 
+subplot(3,4,11); pbaspect([1,1,1]); hold on
 bin_scatter(b(1,:),b(2,:),50:2:200,50:2:200);
 cm_here = colormap_matplotlib('bwr');
 cm_here = flipud(cm_here(floor([2:257]/2),:));
@@ -77,9 +75,10 @@ ylabel('Language peak latency (ms)')
 xticks(50:50:200);yticks(50:50:200)
 set_font
 
-figure(1)
+
 %%
-% ROI wise
+% ROI wise, plotting Extended Data Figure 7
+% we also plot example unit in Fig.5 b during this process
 interested_area = {'MB','AB','MF','AF','MO','AO','LPP','PITP','CLC','AMC'};
 interested_area_name = {'Middle body','Anterior body','Middle face','Anterior face','Middle object','Anterior object','Scene1','Scene2','Middle Color','Anterior Color','Human vertex'};
 figure(2)
@@ -96,11 +95,9 @@ for aa = 1:length(interested_area)
                 Visual_Performance = pred_r_array(:,Alex_FC_idx);
                 LLM_Performance = pred_r_array(:,Mpnet_idx);
                 AVG_data = [AVG_data; [Visual_Performance,LLM_Performance]];
-
                 R2 = min(pred_r2_array(:,[Mpnet_idx,Alex_FC_idx])')';
                 TimeData = pred_r2_array_t(R2>0.05,[Mpnet_idx,Alex_FC_idx],:);
                 TimeCourseData = [TimeCourseData; TimeData];
-
             end
         end
     end
@@ -133,17 +130,16 @@ end
 legend({'Language','Visual'},'Box','off',Location='best')
 drawnow
 figsave(fullfile(root_dir,'Figs/F5'),'EncodingSupp')
+%% 
 
+% Fig. 5e
 figure(1)
-x_here = fMRI_performance(:,1);
-y_here = fMRI_performance(:,2);
+x_here = fMRI_performance(:,1); y_here = fMRI_performance(:,2);
 [beta_area_wise(aa+1),beta_CI_area(aa+1,:)] = demingRegression(x_here, y_here);
 subplot(2,5,8);
 pbaspect([1,1,1])
 hold on
-
 CI = (beta_CI_area(:,2)-beta_CI_area(:,1))/2;
-
 xticks_here = [1,2,1,2,1,2,1,2,1,2,3];
 cc = colormap_matplotlib('tab20',20);
 for bb_data = 1:length(xticks_here)
@@ -158,35 +154,27 @@ for aa = 1:5
     plot([1,2], beta_area_wise([m_idx,a_idx]),LineWidth=1,Color=[0.5,0.5,0.5])
 end
 legend({'Body','','Face','','Object','','Scene','','Color','','Human Vertex'},Location="best")
-xticks([1,2,3]); xlim([0.5,6.5])
+xticks([1,2,3]); xlim([0.5,6.5]);ylim([0.55,1.05]);yticks([0.5:0.1:1]);xtickangle(90);ylabel('Slope');colorbar
 xticklabels({'Middle IT', 'Anterior IT', 'Human VTC'})
-ylim([0.55,1.05])
-yticks([0.5:0.1:1]);
-xtickangle(90)
-ylabel('Slope')
-colorbar
 
+% stats in Fig. 5e
 for aa = 1:5
     m_idx = aa*2-1;
     a_idx = aa*2;
     delta = betas_bootstrap(a_idx,:)-betas_bootstrap(m_idx,:);
     ci = prctile(delta, [0.5 99.5]);
     fprintf(fid,'%s, 99 CI = %.02f - %.02f\n', interested_area_name{aa*2-1}, ci(1), ci(2));
-
-    beta_to_test(1,aa)=beta_area_wise(m_idx);
-    beta_to_test(2,aa)=beta_area_wise(a_idx);
-
+    beta_to_test(1,aa)=beta_area_wise(m_idx); beta_to_test(2,aa)=beta_area_wise(a_idx);
 end
 
 [h,p,ci,stats] = ttest(beta_to_test(1,:),beta_to_test(2,:));
 fprintf(fid, 'MacaqueMA compare: t(%d)=%.02f, p=%.07f\n', stats.df, stats.tstat, p);
 [h,p,ci,stats] = ttest(beta_to_test(:), beta_area_wise(end));
 fprintf(fid, 'MacaqueHuman compare: t(%d)=%.02f, p=%.07f\n', stats.df, stats.tstat, p);
-
+%%
+% Fig. 5g
 figure(52)
-subplot(3,4,10);
-pbaspect([1,1,1])
-hold on
+subplot(3,4,10); pbaspect([1,1,1]); hold on
 xticks_here = [1:10];
 cc = colormap_matplotlib('tab20',20);
 data_now = [];
@@ -211,7 +199,6 @@ for rois_idx = 1:5
     sprintf('ROI%d %d\n',rois_idx,sum(array_now==rois_idx))
 end
 
-
 for cc  = 1:5
     test_data = data_now(array_now==cc);
     [h,p,ci,stats] = ttest(test_data);
@@ -223,7 +210,7 @@ ylabel('Time lag (ms)')
 xticklabels(lab)
 xtickangle(90)
 set_font
-%% Example unit
+% Example unit Fig. 5b
 for aa = [1:2]
     figure(1);
     subplot(2,5,aa+3);
@@ -260,7 +247,7 @@ for aa = [1:2]
     colorbar
 end
 
-%%
+%% Loading and plotting Decoding analysis
 load(fullfile(prep_dir,'S6.mat'))
 t_result = load(fullfile(prep_dir,"S6_time_decoding.mat"));
 fid = fopen(fullfile(root_dir,'Figs/stats','F5Decode.txt'),'w');
@@ -269,41 +256,42 @@ plotx = 2;ploty = 5;
 cc_here = colormap_matplotlib('tab20',20);
 for brain_here = 1:size(acc_save,1)
     for space_here = 1:size(acc_save,2)
-        figure(1);
+        figure(1); % Fig. 5f
         cm_now = cc_here(2*(brain_here-1)+space_here,:);
         subplot(plotx,ploty,9);pbaspect([1,1,1]);hold on
         plot(num_series, acc_save{brain_here,space_here}, 'LineWidth', 2,'Color',cm_now)
 
-        figure(52)
+        figure(52) % Extended Fig. 8 ef
         subplot(3,4,space_here);hold on
         plot(1:size(FC_score,2), r_save{brain_here,space_here}, 'LineWidth', 2,'Color',cm_now)
         scatter(1:size(FC_score,2), r_save{brain_here,space_here}, 10, 'MarkerFaceColor',cm_now,'MarkerEdgeAlpha',0)
     end
 end
 
-figure(1)
+figure(1) % Fig. 5f chance level
 subplot(2,5,9);hold on
 plot(num_series, 100./num_series,'LineWidth',2,LineStyle=':',Color=[0.5 0.5 0.5])
 ldg_pool{2} = 'Macaque Language';
 ldg_pool{4} = 'Human Language';
 legend(ldg_pool,'Box','off',Location='best')
 ylim([0,100]);xlim([0,1000]);xticks(0:200:1000);xlabel('Number of images');ylabel('Decoding Accuracy (%)');xtickangle(0);set_font
-set_font
-colorbar
+set_font; colorbar
 
-figure(52)
+figure(52) % Extended Fig. 8e
 subplot(3,4,1);hold on
 title('Decoding visual feature')
 legend({'Macaque IT','','Human IT',''},Location="northeast",Box="off")
 xlabel('# Component');ylabel('Accuracy (r)');xlim([0,50]);ylim([0,1]);set_font
 set_font
 
+ % Extended Fig. 8f
 subplot(3,4,2);hold on
 title('Decoding language feature')
 legend({'Macaque IT','','Human IT',''},Location="northeast",Box="off")
 xlabel('# Component');ylabel('Accuracy (r)');xlim([0,50]);ylim([0,1]);set_font
 set_font
 
+ % Extended Fig. 8g
 subplot(3,4,3); hold on
 max_pc = 20;
 scatter(r_save{1,1}(1:max_pc),r_save{2,1}(1:max_pc),12,'filled');
@@ -312,10 +300,10 @@ minmin = 0.1;
 plot([minmin,0.9], [minmin,0.9],'LineStyle',':','Color','k')
 legend({'Visual','Language'},'box','off',Location='best',Orientation='horizontal')
 xlim([minmin,1]);ylim([minmin,1])
-ylabel('Human performance')
-xlabel('Macaque performance')
+ylabel('Human performance'); xlabel('Macaque performance')
 set_font
 
+% Extended Data 8g
 figure(52)
 subplot(3,4,9);pbaspect([1,1,1]); hold on
 mm = mean(acc_pool');ee = std(acc_pool')./sqrt(clus_size);
@@ -355,8 +343,9 @@ plot([2,4.5],[113,113],'LineWidth',1,'Color','k')
 
 set_font
 
-acc_plot = [];
-rr_plot = [];
+% Decoding time course
+% plotting Figure 5h, but also plot where you have more candidate images.
+acc_plot = []; rr_plot = [];
 for tt = 1:size(t_result.acc_here,1)
     for ss = 1:size(t_result.acc_here,2)
         acc_plot(tt,ss,:)=t_result.acc_here{tt,ss}(t_result.num_series);
@@ -423,6 +412,7 @@ for nn = 1:length(tnum_series)
 end
 drawnow
 %%
+% save main figure
 figure(1)
 figsave(fullfile(root_dir,'Figs/F5'),'F5')
 figure(2)
@@ -432,7 +422,7 @@ set(gcf,'Position',[500 60 1150 850])
 figsave(fullfile(root_dir,'Figs/F5'),'F5S1')
 
 return
-%% Supp
+%% plot Extended Data Figure 8a
 for ll = 1:8
     Language_model_series{ll} = s_name{ll};
 end
@@ -458,11 +448,8 @@ for v = 1:5
     end
 end
 toc
-%%
-close all; figure(999); set(gcf,'Position',[1 41 1050 210])
-
+close all; figure(999); set(gcf,'Position',[1 41 1050 210]);subplot(1,4,1); hold on
 colors  = colormap_matplotlib('Set2',8); markers = {'o','s','^','d','v','>','<','p'};
-subplot(1,4,1); hold on
 for v = 1:5
     for l = 1:8
         scatter(LVR_h(v,l),LVR_m(v,l),'filled','MarkerFaceColor',colors(v,:),'Marker',markers{l})
@@ -474,7 +461,6 @@ plot([0.88,1],[0.64,0.64],'Color','k')
 plot([0.88,1],[0.75,0.75],'Color','k')
 plot([0.88,0.88],[0.64,0.75],'Color','k')
 plot([1,1],[0.64,0.75],'Color','k')
-
 
 subplot(1,4,2); hold on
 for v = 1:5
@@ -497,16 +483,12 @@ for l = 1:8
 end
 legend(Language_model_series); axis off; set_font
 
-
 figsave(fullfile(root_dir,"Figs/F5/"),'compareModel')
-
-
 %%
+% plot Extended Data Figure 8 b
 clear
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-cd(root_dir)
-addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
+load('DIRS.mat')
+
 reliability_thres = 0.4;
 manual_data = readtable("exclude_area.xls");
 area_array=[];
@@ -522,9 +504,9 @@ end
         continue
     end
     ses_idx = manual_data.SesIdx(area_now);
-    proc1_file_name = dir(fullfile(proc_dir,sprintf('Processed_ses%02d*', ses_idx)));
+    proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ses_idx)));
     proc1_file_name = proc1_file_name.name;
-    pro1_data = load(fullfile(proc_dir,proc1_file_name));
+    pro1_data = load(fullfile(prep_dir,proc1_file_name));
     x1 = manual_data.y1(area_now);
     x2 = manual_data.y2(area_now);
     pos_now = pro1_data.pos;
@@ -591,7 +573,7 @@ for level = 1:8
     drawnow
 end
 
-%% 
+%
 SE = (beta_CI(:,2)-beta_CI(:,1))/2;
 nexttile; hold on
 errorbar(resolution_array, beta_estimate, SE','LineWidth',1,Color=[0.5,0.5,0.5]);
@@ -605,7 +587,6 @@ legend({'Binned MUA','Unbinned Unit'},Box="off",Location="best")
 colorbar
 xtickangle(90)
 set_font
-
 
 %%
 clear beta_estimate beta_CI
@@ -661,14 +642,11 @@ figsave(fullfile(root_dir,"Figs/F5"),'FS5')
 
 
 %%
-%% EF8 BC
+%% EF8 B
 clear
 load DIRS.mat
-
-manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
-
 reliability_thres = 0.4;
-manual_data = readtable("exclude_area.xls");area_array=[];
+manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
 r_array = [];
 %
 resolution_array = [200:200:1600];
@@ -704,24 +682,16 @@ end
         end
     end
     sprintf('%d', area_now)
-end
-%
+    end
 [alls,nm] = load_embedding;
-
-s{1} = alls{6}; 
-s{2} = alls{14};
-
-%
+s{1} = alls{6};  s{2} = alls{14};
 nm={};
 for resolution_idx = 1:length(resolution_array)
     nm{resolution_idx} = sprintf('%d um',resolution_array(resolution_idx));
 end
 %
 close all
-figure
-set(gcf,'Position',[50 550 800 450])
-start_parfor
-rng(1009)
+figure; set(gcf,'Position',[50 550 800 450]);rng(1009)
 for level = 1:8
     rsp_matrix = rsp_pool{level};
     pred_r_array = [];
@@ -763,14 +733,12 @@ legend({'Binned MUA','Unbinned Unit'},Box="off",Location="best")
 colorbar
 xtickangle(90)
 set_font
-
-
+%
 clear beta_estimate beta_CI
 rng(1009)
 sigmalevel = 0.1:0.1:0.9;
 
 nm={};
-
 for s_idx = 1:length(sigmalevel)
     nm{s_idx} = sprintf('\\sigma = %.01f',sigmalevel(s_idx));
 end
@@ -799,7 +767,6 @@ for level = 1:length(sigmalevel)
         xtickangle(0)
     end
 end
-
 
 SE = (beta_CI(:,2)-beta_CI(:,1))/2;
 nexttile; hold on

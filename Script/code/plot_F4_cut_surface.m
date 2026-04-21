@@ -1,16 +1,12 @@
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-cd(root_dir)
-addpath(genpath(pwd));
+% this is just for cut the output surface from NILEARN
 
+load DIRS.mat
+addpath(genpath(pwd));
 mkdir(fullfile(root_dir,'Figs','F4','SurfacePLOT_CUT'))
 mkdir(fullfile(root_dir,'Figs','F4','SurfacePLOT_CUTVisual'))
-
-
-input_dir = 'C:\Users\moonl\Desktop\NNN\Figs\F4\SuarfacePLOT';
+input_dir = 'where your nilearn code output';
 all_input_img = dir(fullfile(input_dir,'*png'));
-
 [imageData, map, alpha] = imread(fullfile(input_dir,all_input_img(end).name));
-
 for img_idx = 1:length(all_input_img)-1
     file_name_here = all_input_img(img_idx).name;
     img_here = imread(fullfile(input_dir,file_name_here));
@@ -39,7 +35,7 @@ for img_idx = 1:length(all_input_img)-1
     hCbar.Label.String='Correlation';
     set_font
     
-    figsave(fullfile(root_dir,"Figs/F4/SurfacePLOT_CUT/"), all_input_img(img_idx).name)
+    figsave(fullfile(root_dir,"Figs","F4","SurfacePLOT_CUT"), all_input_img(img_idx).name)
     close all
 
     figure;
@@ -55,6 +51,6 @@ for img_idx = 1:length(all_input_img)-1
     hCbar.Ticks = round(linspace(-val,val,5),2);
     hCbar.Label.String='Correlation';
     set_font
-    figsave(fullfile(root_dir,"Figs/F4/SurfacePLOT_CUTVisual/"), all_input_img(img_idx).name)
+    figsave(fullfile(root_dir,"Figs","F4","SurfacePLOT_CUTVisual"), all_input_img(img_idx).name)
     close all
 end

@@ -22,7 +22,6 @@ title(sprintf('NI max diff is %f', max(d2)))
 xlabel('# of rising edge')
 ylabel('time lag between edges')
 
-
 if(length(SyncLine.NI_time)~=length(SyncLine.imec_time))
     warning('Sync Fail! Fixing...\n')
     keyboard

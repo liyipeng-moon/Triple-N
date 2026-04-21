@@ -6,10 +6,10 @@ model_nm = {};
 s={};
 load("DIRS.mat")
 
-LLM_dir = fullfile(root_dir,'Data','others','ModelFeature','LLM');
-all_LLM = dir(fullfile(LLM_dir,'*mat'));
+Model_dir = fullfile(root_dir,'Data','others','ModelFeature','LLM');
+all_LLM = dir(fullfile(Model_dir,'*mat'));
 for L_idx = 1:length(all_LLM)
-    LLM = load(fullfile(LLM_dir,all_LLM(L_idx).name));
+    LLM = load(fullfile(Model_dir,all_LLM(L_idx).name));
     llm_ebd = zeros([1000, size(LLM.embeddings,2)]);
     loc = 0;
     for img = 1:1000

@@ -1,11 +1,6 @@
-close all
-clear
-clear;clc
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-cd(root_dir)
-addpath(genpath(pwd));
-[proc_dir,raw_dir] = gen_dirs(root_dir);
-all_info = dir(fullfile(raw_dir,'\*info*'));
+close all;clear;clc
+load DIRS.mat
+all_info = dir(fullfile(H5_dir,'*info*'));
 showrange = -5:0.2:5;
 cm_here = colormap_matplotlib('set1',9);
 MK_array = 1:5;
@@ -15,7 +10,7 @@ for ii = 1:length(all_info)
     info_name = all_info(ii).name;
     MK_IDX(ii) = str2num(info_name(15));
     % Load about unit type
-    GoodUnit = load(fullfile(raw_dir,info_name)).GoodUnitStrc;
+    GoodUnit = load(fullfile(H5_dir,info_name)).GoodUnitStrc;
     type_array = [];
     for unit = 1:length(GoodUnit)
         wf_here = GoodUnit(unit).waveformBC;
@@ -31,7 +26,7 @@ for ii = 1:length(all_info)
     type_array(type_array==4)=3;
     type_pool{ii} = type_array;
     % Load about eye
-    meta_data = load(fullfile(raw_dir,info_name)).meta_data;
+    meta_data = load(fullfile(H5_dir,info_name)).meta_data;
     trial_success = find(meta_data.trial_valid_idx);
     trial_fail = find(~meta_data.trial_valid_idx);
     eye_data = meta_data.eye_matrix;
@@ -85,7 +80,6 @@ subplot(2,6,10)
 histogram(CIx,0:0.1:2,EdgeAlpha=1,FaceColor=[0.5,0.5,0.5],Orientation="horizontal")
 ylim([0,2]);l = xlim;xlim([l(1),l(2)*4])
 colorbar; axis off
-
 
 subplot(2,6,11);hold on
 for ii = 1:length(all_info)
@@ -157,4 +151,4 @@ xticks([]);
 yticks([0:0.5:1])
 ylabel('Proportion')
 xlabel('Session')
-figsave(fullfile(root_dir,"Figs/","FS1"),'FS_Fixation_UnitType')
+figsave(fullfile(root_dir,"Figs"),'EF2_Fixation_UnitType')

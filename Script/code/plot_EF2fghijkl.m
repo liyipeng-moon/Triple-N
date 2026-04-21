@@ -4,8 +4,8 @@ close all
 load DIRS.mat
 
 addpath(genpath(root_dir));
-mkdir Figs\
-mkdir Figs\F2S\
+mkdir Figs
+mkdir(fullfile('Figs','F2S'))
 
 IT_session = [1:70, 88];
 % Spike Quality, for IT data.

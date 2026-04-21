@@ -1,7 +1,6 @@
 function CheckEnv()
 % Checks whether required MATLAB toolboxes and external functions are installed
 missing_toolboxes = {};
-
 required_toolboxes = {
     'Signal Processing Toolbox'
     'Optimization Toolbox'
@@ -44,5 +43,21 @@ if ~isempty(missing_toolboxes)
     error('Please install the missing toolboxes before running the code.');
 else
     fprintf('\n All required toolboxes are available!\n');
+end
+
+fprintf('Looking for other data...\n')
+load DIRS.mat
+ROI_data = dir(fullfile(FMRI_DIR,'ROI_data.mat'));
+if(isempty(ROI_data))
+    warning('Extract /others/fmri.zip and paste its path in main code! \n')
+else
+    fprintf('FMRI path good! \n')
+end
+
+FeatureData = dir(fullfile(Model_Dir,'alexnet_layer_rsp.mat'));
+if(isempty(FeatureData))
+    warning('Extract /others/ModelFeature.zip and paste its path in main code! \n')
+else
+    fprintf('Model Feature path good! \n')
 end
 end

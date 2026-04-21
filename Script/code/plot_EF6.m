@@ -4,8 +4,8 @@ cd(root_dir)
 reliability_thres = 0.4;
 manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
 stats_dir = fullfile(root_dir,"Figs","stats");
-mkdir Figs\
-mkdir Figs\F4\
+mkdir Figs
+mkdir(fullfile('Figs','F4')
 
 img = load(fullfile(root_dir,'Data','others','img_pool.mat')).img_pool;
 

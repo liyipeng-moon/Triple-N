@@ -1,25 +1,24 @@
 function PostProcess_function_raw(data_path)
    
 cd(data_path)
-
-meta_file = dir('processed/META*');
+meta_file = dir(fullfile('processed','META*'));
 load(fullfile(pwd,'processed',meta_file(1).name));
 meta_data = load(fullfile(pwd,'processed',meta_file(1).name));
-ML_FILE = dir("processed\ML*");
+ML_FILE = dir(fullfile("processed","ML*"));
 trial_ML = load(fullfile('processed',ML_FILE(1).name)).trial_ML;
 
 [qMetric, unitType] = run_bc(data_path);
-[UnitStrc] = load_KS4_output('./kilosort_def_5block_97',IMEC_AP_META,SyncLine);
+[UnitStrc] = load_KS4_output(fullfile('.','kilosort_def_5block_97'),IMEC_AP_META,SyncLine);
 
 for trial_idx = 1:length(trial_ML)
     trial_ML(trial_idx).AnalogData.Mouse=[];
     trial_ML(trial_idx).AnalogData.KeyInput=[];
 end
-
-if(strcmp(pwd,'F:\NSD_FULL_RAW\240709'))
+dir_now = pwd; 
+if(strcmp(dir_now(end-5:end), '240901'))
     UnitStrc(638)=[];
 end
-if(strcmp(pwd,'F:\NSD_FULL_RAW\240924'))
+if(strcmp(dir_now(end-5:end), '241119'))
     UnitStrc(328)=[];
 end
 

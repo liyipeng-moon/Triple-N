@@ -24,22 +24,13 @@ else
     trial_ML = mlread(ml_name);
     save(trial_ML_name, "trial_ML")
 end
-
-
 ImecFileName=fullfile(session_name,sprintf('%s_imec0',session_name), sprintf('%s_t0.imec0.lf',session_name));
 [IMEC_META, DCode_IMEC] = load_IMEC_data(ImecFileName);
 ImecFileName=fullfile(session_name,sprintf('%s_imec0',session_name), sprintf('%s_t0.imec0.ap',session_name));
 IMEC_AP_META = load_meta(sprintf('%s.meta', ImecFileName));
-
-
-
 % Do Sync between Devices
 SyncLine = examine_and_fix_sync(DCode_NI, DCode_IMEC);
-
-
 %% check for alignment between ML and NI
-
-
 onset_times = 0;
 offset_times = 0;
 onset_times_by_trial_ML = zeros([1, length(trial_ML)]);
@@ -72,7 +63,6 @@ if(max(onset_times_by_trial_ML-onset_times_by_trial_SGLX)>0)
     warning('Inconsistant Trial Number')
 end
 title(sprintf('MaxErr=%d',max(onset_times_by_trial_ML-onset_times_by_trial_SGLX)))
-
 %% check for dataset
 dataset_pool = {};
 for trial_idx = 1:length(trial_ML)
@@ -87,7 +77,6 @@ valid_eye = 0;
 onset_marker = 0;
 trial_valid_idx = zeros([1,onset_times]);
 dataset_valid_idx = zeros([1,onset_times]);
-
 eye_matrix = [];
 for trial_idx = 1:length(trial_ML)
     trial_data = trial_ML(trial_idx);
@@ -173,7 +162,8 @@ shadedErrorBar((1:size(po_dis,2))-before_onset_measure,mean(po_dis),std(po_dis))
 xlabel('time from event'); title('Exclude Non-Look Trial')
 saveas(gcf,'processed\Prep_sync_ni_ml')
 
-if(strcmp(pwd, 'F:\NSD_Project\Data\240901'))
+dir_now = pwd; 
+if(strcmp(dir_now(end-5:end), '240901'))
     to_delete_data = find(onset_time_ms>1600*1000);
     onset_LOC(to_delete_data)=[];
     onset_latency(to_delete_data)=[];
@@ -181,7 +171,7 @@ if(strcmp(pwd, 'F:\NSD_Project\Data\240901'))
     dataset_valid_idx(to_delete_data)=[];
     trial_valid_idx(to_delete_data)=[];
 end
-if(strcmp(pwd, 'F:\NSD_Project\Data\241119'))
+if(strcmp(dir_now(end-5:end), '241119'))
     to_delete_data = find(onset_time_ms>1550*1000);
     onset_LOC(to_delete_data)=[];
     onset_latency(to_delete_data)=[];
@@ -213,7 +203,7 @@ nexttile
 scatter(1:length(dataset_valid_idx),dataset_valid_idx)
 xlabel('onset idx')
 title('which dataset',Interpreter='none')
-saveas(gcf,'processed\Prep_img_size')
+saveas(gcf,fullfile('processed','Prep_img_size'))
 
 save_name = fullfile('processed',sprintf('META_%s_%s_%s.mat', exp_day, exp_subject, img_set_name));
 onset_time_ms = onset_time_ms-5 ; % fix monitor time err

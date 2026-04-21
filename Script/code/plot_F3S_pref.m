@@ -17,7 +17,6 @@ end
 cm_here = colormap_matplotlib('Set1',9);
 figure;set(gcf,'Position',[500 200 1200 650])
 %%
-
 interested_area={'MO','AO','MF','AF','MB','AB','LP','PI','CL','AM'};
 areaname={'M-Object','A-Object','M-Face','A-Face','M-Body','A-Body','Scene1','Scene2','M-Color','A-Color'};
 

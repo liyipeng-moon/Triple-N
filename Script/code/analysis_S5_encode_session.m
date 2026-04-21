@@ -1,4 +1,4 @@
-function S5_Encoding_Session(area_now)
+function analysis_S5_encode_session(area_now)
 load('DIRS.mat')
 reliability_thres = 0.4;
 manual_data = readtable(fullfile(root_dir,'Data','others',"exclude_area.xls"));

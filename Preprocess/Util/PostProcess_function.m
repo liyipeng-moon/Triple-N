@@ -1,7 +1,7 @@
 function PostProcess_function(data_path)
 cd(data_path)
 load global_params.mat
-meta_file = dir('processed/GoodUnitRaw*');
+meta_file = dir(fullfile('processed','GoodUnitRaw*'));
 load(fullfile('processed',meta_file(1).name));
 pre_onset = global_params.pre_onset;
 post_onset = global_params.post_onset;
@@ -18,10 +18,10 @@ img_size = meta_data.img_size;
 good_trial = find(trial_valid_idx);
 img_idx = trial_valid_idx(good_trial);
 
-load("processed\fscale.mat")
+load(fullfile("processed","fscale.mat"))
 
-template_bc = fscale*readNPY(fullfile('processed/BC/templates._bc_rawWaveforms.npy'));
-template_ks = readNPY(fullfile('kilosort_def_5block_97/templates.npy'));
+template_bc = fscale*readNPY(fullfile('processed','BC','templates._bc_rawWaveforms.npy'));
+template_ks = readNPY(fullfile('kilosort_def_5block_97','templates.npy'));
 template_ks = permute(template_ks,[1,3,2]);
 
 for spike_num = 1:length(UnitStrc)

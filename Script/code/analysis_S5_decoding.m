@@ -2,35 +2,26 @@ clear;clc
 load DIRS.mat
 cd(root_dir)
 addpath(genpath(pwd));
-
+%% load ephys data
 reliability_thres = 0.4;
 all_neuron_data = [];
-all_neuron_data_t1 = [];
-all_neuron_data_t2 = [];
 all_neuron_data_t3 = [];
-all_neuron_data_t4 = [];
-all_neuron_data_t5 = [];
 general_info_data = load(dir(fullfile(H5_dir,'*ses01*info*')).name);
-
 IT_session = [1:70, 88];
-
-
 for ses_idx = IT_session
-    
     proc1_file_name = dir(fullfile(prep_dir,sprintf('Processed_ses%02d*', ses_idx)));
     proc1_file_name = proc1_file_name.name;
     pro1_data = load(fullfile(prep_dir,proc1_file_name));
     rr_here = pro1_data.reliability_best;
-    rsp_here = pro1_data.response_best(rr_here>0.4, 1:1000);
+    rsp_here = pro1_data.response_best(rr_here>reliability_thres, 1:1000);
     rsp_here = zscore(rsp_here,0,2);
     all_neuron_data = [all_neuron_data; rsp_here];
-
 
     filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',ses_idx)));
     filename_here = filename_here.name;
     PSTHData = h5read(fullfile(H5_dir,filename_here), '/response_matrix_img');
 
-    good_units = find(rr_here>0.4);
+    good_units = find(rr_here>reliability_thres);
     ses_data_t3 = [];ses_data_t4 = [];ses_data_t5 = [];
     for uu = 1:length(good_units)
         uu_here = good_units(uu);
@@ -42,18 +33,18 @@ for ses_idx = IT_session
     all_neuron_data_t3 = [all_neuron_data_t3;ses_data_t3];
     fprintf('Loaded data from session %d \n', ses_idx)
 end
-%%
-ROI_info=load('ROI_info.mat');
+%% Load fMRI data
+ROI_info=load(fullfile(FMRI_DIR,'ROI_info.mat'));
 subject_pool = {1,2,5,7};
 for SS = 1:4
     interested_subject=subject_pool{SS};
     hemi_here = 'lh';
-    fMRI_data = load(fullfile(root_dir,"NNN_Data/FMRI",sprintf('S%d_%s_Rsp.mat',interested_subject,hemi_here)));
+    fMRI_data = load(fullfile(root_dir,"Data","FMRI",sprintf('S%d_%s_Rsp.mat',interested_subject,hemi_here)));
     fMRI_data = fMRI_data.mean_brain_data;
     fMRI_data = double(fMRI_data)./300;
     lh_data = fMRI_data(find(getfield(ROI_info, sprintf('S%d_%s_General',interested_subject,hemi_here))),:);
     hemi_here = 'rh';
-    fMRI_data = load(fullfile(root_dir,'NNN_Data/FMRI/',sprintf('S%d_%s_Rsp.mat',interested_subject,hemi_here)));
+    fMRI_data = load(fullfile(root_dir,'Data','FMRI',sprintf('S%d_%s_Rsp.mat',interested_subject,hemi_here)));
     fMRI_data = fMRI_data.mean_brain_data;
     fMRI_data = double(fMRI_data)./300;
     rh_data = fMRI_data(find(getfield(ROI_info, sprintf('S%d_%s_General',interested_subject,hemi_here))),:);
@@ -61,8 +52,9 @@ for SS = 1:4
 end
 all_brain_data = [all_data_subj{1}', all_data_subj{2}',all_data_subj{3}',all_data_subj{4}'];
 
-load alexnet_resp.mat
-LLM = load('LLM_allv2.mat');
+%% Load model feature
+load(fullfile(Model_Dir,'alexnet_resp.mat'))
+LLM = load(fullfile(Model_Dir,'LLM','LLM_mpnetv2.mat'));
 llm_ebd = zeros([1000, 768]);
 loc = 0;
 for img = 1:1000
@@ -73,15 +65,17 @@ end
 max_repetition = 50000;
 num_series = [2:5:99,100:20:1000];
 fprintf('Load Data Finished!!!')
+
 %% Decoding for different space
 y_pool = {fc6_4096', llm_ebd};
 ytitle_pool = {'Visual','Language'};
 x_pool = {all_neuron_data_t3',all_brain_data};
 xtitle_pool = {'Macaque','Human'};
+%%
 ldg_pool = {};
 acc_save = {};
 for brain_here = 1:length(x_pool)
-    [coeff,neuron_score,latent,tsquared,explained,mu] = pca(x_pool{brain_here},NumComponents=500);
+    [coeff,neuron_score,latent,tsquared,explained,mu] = pca(x_pool{brain_here},NumComponents=min(500,size(x_pool{brain_here},2)));
     neuron_score = neuron_score';
     for space_here = 1:length(y_pool)
         [coeff,FC_score,latent,tsquared,explained,mu] = pca(y_pool{space_here},NumComponents=100);
@@ -91,7 +85,7 @@ for brain_here = 1:length(x_pool)
         r_save{brain_here, space_here} = r_here;
     end
 end
-ClusInfo = load('ClusInfo.mat'); 
+ClusInfo = load(fullfile(root_dir,'Data','ClusInfo.mat')); 
 clus_size = max(ClusInfo.Cluster_idx);
 space_here = 1;[coeff,FC_score,latent,tsquared,explained,mu] = pca(y_pool{space_here},NumComponents=100);
 acc_pool = [];
@@ -107,17 +101,12 @@ for brain_here = 1:length(x_pool)
 end
 save(fullfile(prep_dir,'S6.mat'))
 %% Decoding Across Time
-
-clear;clc
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-[prep_dir,H5_dir] = gen_dirs(root_dir);
+clear;clc;
+load DIRS.mat
 cd(root_dir)
 addpath(genpath(pwd));
 reliability_thres = 0.4;
-
-
 IT_session = [1:70, 88];
-
 decode_tin = -10:1:360;
 allt_binned_data = zeros([30000, length(decode_tin),1000],'single');
 unit_idx = 1;
@@ -127,12 +116,12 @@ for ses_idx = IT_session
     proc1_file_name = proc1_file_name.name;
     pro1_data = load(fullfile(prep_dir,proc1_file_name));
     rr_here = pro1_data.reliability_best;
-    rsp_here = pro1_data.response_best(rr_here>0.4, 1:1000);
+    rsp_here = pro1_data.response_best(rr_here>reliability_thres, 1:1000);
     rsp_here = zscore(rsp_here,0,2);
     filename_here = dir(fullfile(H5_dir,sprintf('ses%02d*h5',ses_idx)));
     filename_here = filename_here.name;
     PSTHData = h5read(fullfile(H5_dir,filename_here), '/response_matrix_img');
-    good_units = find(rr_here>0.4);
+    good_units = find(rr_here>reliability_thres);
     ses_bin_data = [];
     for uu = 1:length(good_units)
         uu_here = good_units(uu);
@@ -149,8 +138,8 @@ for ses_idx = IT_session
 end
 
 allt_binned_data(unit_idx:end,:,:)=[];
-load alexnet_resp.mat
-LLM = load('LLM_allv2.mat');
+load(fullfile(Model_Dir,'alexnet_resp.mat'))
+LLM = load(fullfile(Model_Dir,'LLM','LLM_mpnetv2.mat'));
 llm_ebd = zeros([1000, 768]);
 loc = 0;
 for img = 1:1000
@@ -167,27 +156,17 @@ for tt = 1:size(allt_binned_data,2)
     x_pool{tt} = squeeze(allt_binned_data(:,tt,:))';
 end
 clear allt_binned_data
-%% Decoding Across Time
-
-tic
-acc_here = {};
-r_here = {};
+% Decoding Across Time
+acc_here = {}; r_here = {};
 start_parfor
 for space_here = 1:length(y_pool)
-    tic
     [coeff,FC_score,latent,tsquared,explained,mu] = pca(y_pool{space_here},NumComponents=100);
-    ppm = ParforProgMon('Par...', length(x_pool) , 1, 1200, 200);
     for brain_here = 1:length(x_pool)
         [coeff,neuron_score,latent,tsquared,explained,mu] = pca(x_pool{brain_here},NumComponents=500);
         neuron_score = neuron_score';
         [acc_now, r_now] = fn_decoding_acc(neuron_score, FC_score,max_repetition,num_series,1:1000);
         acc_here{brain_here,space_here} = acc_now;
         r_here{brain_here,space_here} =r_now;
-        ppm.increment();
     end
-    space_here
 end
-toc
 save(fullfile(prep_dir,'S6_time_decoding.mat'), "acc_here","r_here","decode_tin","num_series")
-
-return

@@ -5,11 +5,10 @@ function [LVR_m,LVR_h,TimeLag] = gen_species_difference(v_idx, l_idx)
 % 
 % Also estimates the average encoding peak temporal lag between model.
 
-root_dir = 'C:\Users\moonl\Desktop\NNN';
-[proc_dir,~] = gen_dirs(root_dir);
-manual_data = readtable("exclude_area.xls");
+load DIRS.mat
+manual_data = readtable(fullfile(root_dir,'Data','others','exclude_area.xls'));
 %% Analysis for alexnet_fc6 and mpnet
-load('fMRI_result.mat')
+load(fullfile(root_dir, 'Data','fMRI_result.mat'))
 Interested_Voxel = find(voxel_info_1~=0);
 for vertex = 1:length(Interested_Voxel)
     fMRI_performance(vertex,1) = max(r(Interested_Voxel(vertex),v_idx));
@@ -21,8 +20,8 @@ TimeCourseData = [];
 TimeLag = [];
 for ses = 1:102
     if(strcmp(manual_data.Area{ses},'IT'))
-        EncodingData = dir(fullfile(proc_dir,sprintf("s5_encode_ses_%03d.mat",ses)));
-        load(fullfile(proc_dir,EncodingData.name));
+        EncodingData = dir(fullfile(prep_dir,sprintf("s5_encode_ses_%03d.mat",ses)));
+        load(fullfile(prep_dir,EncodingData.name));
         Visual_Performance = max(pred_r_array(:,v_idx),[],2);
         LLM_Performance = pred_r_array(:,l_idx);
         AVG_data = [AVG_data; [Visual_Performance,LLM_Performance]];
@@ -34,10 +33,8 @@ for ses = 1:102
     end
 end
 %%
-x_here = AVG_data(:,1);
-y_here = AVG_data(:,2);
+x_here = AVG_data(:,1); y_here = AVG_data(:,2);
 [LVR_m,~] = demingRegression(x_here, y_here);
-x_here = fMRI_performance(:,1);
-y_here = fMRI_performance(:,2);
+x_here = fMRI_performance(:,1); y_here = fMRI_performance(:,2);
 [LVR_h,~] = demingRegression(x_here, y_here);
 TimeLag = mean(TimeLag);
